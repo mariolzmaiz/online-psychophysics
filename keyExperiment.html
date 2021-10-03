@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="../online-psychophysics/jspsych-psychophysics-master/js/jspsych.js"></script>
+        <script src="../online-psychophysics/jspsych-psychophysics-master/jspsych-psychophysics.js"></script>
+        <link rel="stylesheet" href="../online-psychophysics/jspsych-psychophysics-master/css/jspsych.css"></link>
+    </head>
+    <body></body>
+    <script>
+      // This file demonstrates how to specify the keyboard-event functions.
+
+      let current_color = 0;
+
+      var circle_obj = {
+          obj_type: 'circle',
+          startX: 'center',
+          startY: 'center',
+          radius: 150,
+          line_color: 'white',
+          fill_color: `${current_color}`,
+          line_width: 5,
+      };
+
+      const trial = {
+          type: 'psychophysics',
+          canvas_height: 500,
+          prompt: '<p>By pressing the ArrowUp the time will be registered</p>',
+          stimuli: [circle_obj], // These can be referenced using the jsPsych.currentTrial().stimuli array.
+          response_type: 'key',
+          choices: [' '],
+          trial_duration: 5000,
+          response_ends_trial: false,
+          key_down_func: function(event){ // The key_up_func is also available. In that case, the color of the circle changes when you release the key. 
+            if (event.key === 'ArrowUp'){
+                current_color = "white";
+              console.log(event.timeStamp);
+            }
+
+            // Note that when specify the space bar, you need to write event.key === ' ' not event.key === 'space'.
+            
+            jsPsych.currentTrial().stim_array[0].fill_color = `${current_color}`;
+          },
+          key_up_func: function(event){ // The key_up_func is also available. In that case, the color of the circle changes when you release the key. 
+            if (event.key === 'ArrowUp'){
+                current_color = "black";
+              console.log(event.timeStamp);
+            }
+
+            // Note that when specify the space bar, you need to write event.key === ' ' not event.key === 'space'.
+            
+            jsPsych.currentTrial().stim_array[0].fill_color = `${current_color}`;
+          },
+      }
+
+      /* start the experiment */
+      jsPsych.init({
+        timeline: [trial],
+        on_finish: function(){jsPsych.data.displayData();}
+      });
+  </script>
+</html>
