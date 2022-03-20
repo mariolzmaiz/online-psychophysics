@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Mi experimento</title>
+        <script src="jspsych/jspsych.js"></script>
+        <script src="jspsych/plugins/jspsych-html-keyboard-response.js"></script>
+        <script src="jspsych/plugins/jspsych-audio-keyboard-response.js"></script>
+        <script src="jspsych/plugins/jspsych-survey-html-form.js"></script>
+        <script src="jspsych/plugins/jspsych-survey-text.js"></script>
+        <script src="jspsych/plugins/jspsych-preload.js"></script>
+        <script src="jspsych/plugins/jspsych-html-button-response.js"></script>
+        <script src="jspsych/plugins/jspsych-canvas-slider-response.js"></script>
+        <script src="file.js"></script>
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+        <script src="analysis.js"></script>
+        <script src="soundGeneration.js"></script>
+        <script src="amcharts.js"></script>
+        <script src="cdn.amcharts.comindex.js"></script>
+        <script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
+        <script src="cdn.amcharts.comradar.js"></script>
+        <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+        
+        <!-- 
+       
+        <style>
+            #chartdiv {
+                width: 100%;
+                height: 500px;
+            }
+        </style>
+        
+        -->
+        
+        <link rel="stylesheet" href="style.css">
+        <link href="jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+    </head>
+    <body></body>
+    <script>
+    //graficon();
+    
+    
+/**************** 
+Load components
+****************/
+
+var timeline = [];
+const timeList = [];
+
+/* preload images */
+var preload = {
+  type: 'preload',
+  audio: ['tone100ms.wav']
+}
+timeline.push(preload);
+
+
+/*
+var pito2 = [];
+
+visualize();
+hola();
+pito2 = getCleanLsit(ogB, userB);
+console.log(pito2);
+/*
+
+/* add keystroke time to the list */
+function listenKey(event){
+  timeList.push(Math.round(event.timeStamp));
+}
+
+
+
+/******************** 
+Timeline
+********************/
+
+/*
+var pruebacanvas = {
+    type: 'canvas-slider-response',
+    stimulus: visualize,
+    labels: ['0','10'],
+    canvas_size: [150, 150],
+    prompt: '<p>How different would you say the colors of these two squares are on a scale from 0 (the same) to 10 (completely different)</p>'
+}
+timeline.push(pruebacanvas);
+/*
+
+
+/* get user data */
+var survey_trial = {
+  type: 'survey-text',
+  questions: [
+    {prompt: "How old are you?", name: 'Age'}, 
+    {prompt: "Where were you born?", name: 'BirthLocation'}
+  ],
+};
+timeline.push(survey_trial);
+
+/* define trial 1 procedure */
+var controlTrialWelcome = {
+  type: "html-button-response",
+  stimulus: "You will hear a series of beeps, follow the rythm by taping any letter key.",
+  choices: ['Ready']
+};
+timeline.push(controlTrialWelcome);
+
+/* add trial 1 to timeline */
+/* add trial 1 to timeline */
+var controlTrial = synchronizationOnly(10, 400);
+timeline = timeline.concat(controlTrial);
+
+
+/* define trial 2 procedure */
+var silenceTrialWelcome = {
+  type: "html-button-response",
+  stimulus: "You will hear a series of beeps, follow the rythm by taping any letter key. \n At some point the beeps will stop, but you have to keep taping to the rythm.",
+  choices: ['Ready']
+};
+timeline.push(silenceTrialWelcome);
+
+/* add trial 2 to timeline */
+var silenceTrial = synchronizationContinuation(10, 400, 1000);
+timeline = timeline.concat(silenceTrial);
+
+
+
+/*
+var silenceTrialWelcome = {
+  type: "html-button-response",
+  stimulus: "You will hear a series of beeps, follow the rythm by taping any letter key. \n At some point the beeps will stop, but you have to keep taping to the rythm.",
+  choices: ['Ready']
+};
+timeline.push(silenceTrialWelcome);
+
+var lastTrial = rythmTrial(4, [600, 600, 900]);
+timeline = timeline.concat(lastTrial);
+*/
+
+/******************** 
+End the experiment
+********************/
+
+/* returns array with the times of all ogBeats 
+Parmater: [[nBeats, interval, silenceTime], [idem], ...]
+Return: array with each experiments times: [[100, 200, 300...], [idem], ...]*/
+function getExperimentsTimes(experimentsConfig){
+  var times = [];
+  var all_data = jsPsych.data.get().json();
+  var all_data_json = JSON.parse(all_data);
+  
+  //for each experiment
+  for (var j=0; j < experimentsConfig.length; j++){
+    var exp = []; //this array will contain the times of a experiment
+    
+    if(j == 0){
+        var i = 3;  //first experiment starts at the time 3
+    }
+    else{
+        var i = i+1;    //rest of experiments start where the index left off plus 1 for the shown text 
+    }
+    var stopAt = i + experimentsConfig[j][0]; //number of beats in the experiment (nBeats)
+    
+    for(i; i < stopAt; i++){
+        exp.push(all_data_json[i].time_elapsed);
+    }
+    
+    //if there is silence time
+    if(experimentsConfig[j][2] != 0){
+        var nBeatsSilence = experimentsConfig[j][2] / experimentsConfig[j][1];
+        pito = all_data_json[i];
+        for(let i = 0; i<nBeatsSilence; i ++){
+            pito += experimentsConfig[j][1];
+            exp.push(pito);
+        }
+    }
+    times.push(exp);
+  }
+  
+  return(times);
+}
+
+function getExperimentsTimesAll(beatsInEachExp){
+  var times = [];
+  var all_data = jsPsych.data.get().json();
+  var all_data_json = JSON.parse(all_data);
+  
+  for (var j=0; j < beatsInEachExp.length; j++){
+    if(j == 0){
+        var i = 3;  //first experiment starts at the time 3
+    }
+    else{
+        var i = i+1;    //rest of experiments start where the index left off plus 1 for the shown text 
+    }
+    var stopAt = i + beatsInEachExp[j][0]; //number of beats in the experiment (nBeats)
+    
+    for(i; i < stopAt; i++){
+        times.push(all_data_json[i].time_elapsed);
+    }
+    
+    //if there is silence time
+    if(beatsInEachExp[j][2] != 0){
+        var nBeatsSilence = beatsInEachExp[j][2] / beatsInEachExp[j][1];
+        pito = all_data_json[i];
+        for(let i = 0; i<nBeatsSilence; i ++){
+            pito += beatsInEachExp[j][1];
+            times.push(pito);
+        }
+    }
+        
+    }
+
+  return(times);
+}
+
+/*ogTimes: array with arrays of experiment times
+userTimes: array with all times*/
+function separateUserTimes(ogTimes, userTimes){
+    var times = [];
+    var allTimes = [];
+    var j = 0;
+    for (let i=0; i<userTimes.length; ){
+        var tito = ogTimes[j][0];
+        //var titto = ogTimes[j+1][0];
+        //if we are at the last experiment
+        if(j == ogTimes.length -1){
+            times.push(userTimes[i]);
+            i++;
+            //if it is the last time of the last experiment
+            if(i == userTimes.length - 1){
+                allTimes.push(times);
+            }
+        }
+        
+        //if a user time is in the time range of one experiment
+        else if ((ogTimes[j][0] < userTimes[i]) && (userTimes[i] < ogTimes[j+1][0])){
+            times.push(userTimes[i]);
+            i++;
+        }
+        //if that user time is not in the experiment range we pass to the next experiment range
+        else{
+            j++;
+            allTimes.push(times);
+            times = [];
+        }
+
+    }
+    return allTimes;
+}
+
+function results(expConfig){
+    
+    var ogTimes = getExperimentsTimes(expConfig);
+    console.log("ogTimes: ");
+    console.log(ogTimes);
+    var userTimes = separateUserTimes(ogTimes, timeList);
+    console.log("userTimes: ");
+    console.log(userTimes);
+    genera_tabla();
+    for(let i=0; i<expConfig.length; i++){
+        if(expConfig[2] == 0){
+            var polar = polarAsynchrony(ogTimes[i], userTimes[i]);
+        }
+        else{
+            var polar = polarAsynchonyCont(ogTimes[i], userTimes[i]);
+        }
+        
+        console.log("polar: ");
+        console.log(polar);
+        graficon1(polar, i)
+    }
+
+}
+
+var showResults = {
+  type: "html-button-response",
+  stimulus: function(data){
+    
+    getExperimentsTimes();
+    
+          var temp = "<ul>";
+          for (var i = 0; i < timeList.length; i++) {
+            temp += "<li>" + timeList[i] + "</li>";
+          }
+          temp += "</ul>";
+          return temp;
+        },
+  response_ends_trial: true,
+  choices: ['end'],
+  on_start: function() {
+      stim = "<ul> <li>" + timeList[0] + "</li> <li> Tea </li> </ul> ";
+  }
+}
+//timeline.push(showResults);
+var lasttrialdata = jsPsych.data.getLastTrialData();
+
+
+
+jsPsych.init({
+  timeline: timeline,
+  override_safe_mode: true,
+  on_finish: function() {
+  //console.log(getExperimentsTimesAll([[30, 0, 0], [30, 0, 0]]));//og
+  //console.log(timeList);//user
+  
+  results([[10, 400, 0], [10, 400, 1000]]);
+  
+  //var polar = polarAsynchrony(getExperimentsTimesAll([[30, 0, 0], [15, 400, 6000]]), timeList);
+  //graficon([10]);
+  //graficon1(polar, expIndex);
+  
+    //calcAsynchrony(getExperimentsTimesAll([[30, 0, 0], [30, 0, 0]]), timeList);
+  //sleep(1000);
+    //jsPsych.data.displayData();
+  }
+}); 
+
+    </script>
+</html>
