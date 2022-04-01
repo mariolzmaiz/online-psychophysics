@@ -129,12 +129,14 @@ function polarAsynchrony(ogBeats, userBeats){
     return toPolar(ogBeats, cleanList);
 }
 
+//get the user times that start on the continuation phase
 function continuationTimes(ogBeats, userBeats){
     lastOg = ogBeats[ogBeats.length - 1];
     var min = lastOg;
     var dif = 0;
     minIndex = 0;
     contUserBeats = [];
+    
     for(let i=0; i<userBeats.length; i++){
         dif = lastOg - userBeats[i];
         
@@ -155,9 +157,9 @@ function continuationTimes(ogBeats, userBeats){
 }
 
 function polarAsynchonyCont(ogBeats, userBeats){
-    userTimesCut = continuationTimes(ogBeats, userBeats);
-    variableRythm(userTimesCut)
-    return toPolar
+    var userTimesCut = continuationTimes(ogBeats, userBeats);
+    var errorITI = variableRythm(userTimesCut);
+    return toPolarNormalized(errorITI);
 }
 
 function toPolarNormalized(userBeats){
@@ -437,4 +439,22 @@ let ticktext = ticks.append('text')
     .attr("text-anchor", "middle")
     .text(d => d)
 
+}
+
+/*
+ * Transforms the userTimes into the points for the scatter plot
+ * continuationTimes: usertTimes from the silence period until the end
+ * interval: initial "perfect" interval
+ * data: [{ax: beatNum, ay: interval}, {}, ..]
+ */ 
+function timesToPoints(continuationTimes, interval){
+    var data = [];
+    var presentInterval = 0;
+    data.push(interval);
+    
+	for (let i=1; i< continuationTimes.length; i++){
+        presentInterval = continuationTimes[i] - continuationTimes[i-1];
+		data.push({"ax": i, "ay": presentInterval,});
+	}
+    return data;
 }

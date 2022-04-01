@@ -15,9 +15,11 @@
         <script src="analysis.js"></script>
         <script src="soundGeneration.js"></script>
         <script src="amcharts.js"></script>
-        <script src="cdn.amcharts.comindex.js"></script>
+        <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+        <!-- <script src="cdn.amcharts.comindex.js"></script>-->
         <script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
-        <script src="cdn.amcharts.comradar.js"></script>
+        <script src="https://cdn.amcharts.com/lib/5/radar.js"></script>
+       <!--  <script src="cdn.amcharts.comradar.js"></script>-->
         <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
         
         <!-- 
@@ -105,12 +107,34 @@ var controlTrialWelcome = {
 timeline.push(controlTrialWelcome);
 
 /* add trial 1 to timeline */
-/* add trial 1 to timeline */
 var controlTrial = synchronizationOnly(10, 400);
 timeline = timeline.concat(controlTrial);
 
-
 /* define trial 2 procedure */
+var controlTrialWelcome = {
+  type: "html-button-response",
+  stimulus: "You will hear a series of beeps, follow the rythm by taping any letter key.",
+  choices: ['Ready']
+};
+timeline.push(controlTrialWelcome);
+
+/* add trial 2 to timeline */
+var controlTrial = synchronizationOnly(10, 400);
+timeline = timeline.concat(controlTrial);
+
+/* define trial 3 procedure */
+var controlTrialWelcome = {
+  type: "html-button-response",
+  stimulus: "You will hear a series of beeps, follow the rythm by taping any letter key.",
+  choices: ['Ready']
+};
+timeline.push(controlTrialWelcome);
+
+/* add trial 3 to timeline */
+var controlTrial = synchronizationOnly(10, 400);
+timeline = timeline.concat(controlTrial);
+
+/* define trial 4 procedure */
 var silenceTrialWelcome = {
   type: "html-button-response",
   stimulus: "You will hear a series of beeps, follow the rythm by taping any letter key. \n At some point the beeps will stop, but you have to keep taping to the rythm.",
@@ -118,8 +142,32 @@ var silenceTrialWelcome = {
 };
 timeline.push(silenceTrialWelcome);
 
-/* add trial 2 to timeline */
-var silenceTrial = synchronizationContinuation(10, 400, 1000);
+/* add trial 4 to timeline */
+var silenceTrial = synchronizationContinuation(5, 400, 2000);
+timeline = timeline.concat(silenceTrial);
+
+/* define trial 5 procedure */
+var silenceTrialWelcome = {
+  type: "html-button-response",
+  stimulus: "You will hear a series of beeps, follow the rythm by taping any letter key. \n At some point the beeps will stop, but you have to keep taping to the rythm.",
+  choices: ['Ready']
+};
+timeline.push(silenceTrialWelcome);
+
+/* add trial 5 to timeline */
+var silenceTrial = synchronizationContinuation(5, 400, 2000);
+timeline = timeline.concat(silenceTrial);
+
+/* define trial 6 procedure */
+var silenceTrialWelcome = {
+  type: "html-button-response",
+  stimulus: "You will hear a series of beeps, follow the rythm by taping any letter key. \n At some point the beeps will stop, but you have to keep taping to the rythm.",
+  choices: ['Ready']
+};
+timeline.push(silenceTrialWelcome);
+
+/* add trial 6 to timeline */
+var silenceTrial = synchronizationContinuation(5, 400, 2000);
 timeline = timeline.concat(silenceTrial);
 
 
@@ -165,6 +213,7 @@ function getExperimentsTimes(experimentsConfig){
     }
     
     //if there is silence time
+    /*
     if(experimentsConfig[j][2] != 0){
         var nBeatsSilence = experimentsConfig[j][2] / experimentsConfig[j][1];
         pito = all_data_json[i];
@@ -172,7 +221,7 @@ function getExperimentsTimes(experimentsConfig){
             pito += experimentsConfig[j][1];
             exp.push(pito);
         }
-    }
+    }*/
     times.push(exp);
   }
   
@@ -247,6 +296,7 @@ function separateUserTimes(ogTimes, userTimes){
     return allTimes;
 }
 
+/* expConfig: [nBeats, interval, silenceTime]*/
 function results(expConfig){
     
     var ogTimes = getExperimentsTimes(expConfig);
@@ -255,13 +305,23 @@ function results(expConfig){
     var userTimes = separateUserTimes(ogTimes, timeList);
     console.log("userTimes: ");
     console.log(userTimes);
-    genera_tabla();
+    
+    prepareTables(); 
+    var scatterIndex = 0;
+    
+    //for each experiment
     for(let i=0; i<expConfig.length; i++){
-        if(expConfig[2] == 0){
+        //if it is a synchronizationOnly 
+        if(expConfig[i][2] == 0){
             var polar = polarAsynchrony(ogTimes[i], userTimes[i]);
         }
         else{
+        //if it is synchronization continuation
             var polar = polarAsynchonyCont(ogTimes[i], userTimes[i]);
+            
+            var dataPoints = timesToPoints(continuationTimes, expConfig[i][1])
+            scatterPlot(dataPoints, scatterIndex);
+            scatterIndex++;
         }
         
         console.log("polar: ");
@@ -302,7 +362,7 @@ jsPsych.init({
   //console.log(getExperimentsTimesAll([[30, 0, 0], [30, 0, 0]]));//og
   //console.log(timeList);//user
   
-  results([[10, 400, 0], [10, 400, 1000]]);
+  results([[10, 400, 0], [10, 400, 0], [10, 400, 0], [5, 400, 2000], [5, 400, 2000], [5, 400, 2000]]);
   
   //var polar = polarAsynchrony(getExperimentsTimesAll([[30, 0, 0], [15, 400, 6000]]), timeList);
   //graficon([10]);
