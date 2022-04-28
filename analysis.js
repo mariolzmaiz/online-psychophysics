@@ -107,7 +107,7 @@ function toPolar(ogBeats, userBeats){
 */
 
 
-function variableRythm(userTimes){
+function variablerhythm(userTimes){
 var e_i = 0;
 var ITI_i = 0;
 var E_i = 0;
@@ -158,7 +158,7 @@ function continuationTimes(ogBeats, userBeats){
 
 function polarAsynchonyCont(ogBeats, userBeats){
     var userTimesCut = continuationTimes(ogBeats, userBeats);
-    var errorITI = variableRythm(userTimesCut);
+    var errorITI = variablerhythm(userTimesCut);
     return toPolarNormalized(errorITI);
 }
 
@@ -178,7 +178,7 @@ function toPolar(ogBeats, userBeats){
     var cleanList = [];
     var polarList = [];
     for(let i=0; i<ogBeats.length; i++){
-        //if the user did not missed that beat
+        //if the user did not miss that beat
         if(userBeats[i] != -1){
             cleanList[i] = ogBeats[i] - userBeats[i];
             last = ogBeats[i] - prev;
@@ -457,4 +457,35 @@ function timesToPoints(continuationTimes, interval){
 		data.push({"ax": i, "ay": presentInterval,});
 	}
     return data;
+}
+
+/*
+ * Functions to calculate the Vector
+ */
+function sum(a) {
+    var s = 0;
+    for (var i = 0; i < a.length; i++) s += a[i];
+    return s;
+} 
+ 
+function degToRad(a) {
+    if(a < 0){
+        a += 360;
+    }
+    return Math.PI / 180 * a;
+}
+ 
+function meanAngleDeg(angles) {
+    return 180 / Math.PI * Math.atan2(
+        sum(angles.map(degToRad).map(Math.sin)) / angles.length,
+        sum(angles.map(degToRad).map(Math.cos)) / angles.length
+    );
+}
+
+function magnitude(a){
+    return math.exp(math.multiply(math.i, a));
+}
+
+function meanResVect(angles){
+    return Math.abs(sum(angles.map(magnitude)) / angles.length);
 }

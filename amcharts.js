@@ -48,149 +48,110 @@ function formatData(dataDict){
 
 function createChartDiv(chartType, experimentNum){
  	var name = chartType + experimentNum.toString();
+    
  	var z = document.createElement('div'); 
       	z.setAttribute("id", name);
-      	return z;
+        
+    if(chartType == "chartdiv"){
+        var vector = "vector" + experimentNum.toString();
+        
+        //z.appendChild(document.createTextNode("99 θ "));
+        var y = document.createElement('div'); 
+      	y.setAttribute("id", vector);
+         z.appendChild(y);
+    }
+    
+    return z;
 }
 
+//Inserts the divs where the tables containing the graphs will be set
 function prepareTables(){
+    var polarExp = "The polar charts show the phase difference from the given rhythm to your executed rhythm. Positive degree = phase delay, Negative degree = phase anticipation. 0 being perfect synchronization.";
+    var scatterExp = "The scatter charts show the deviation of interval duration over time. The more constant, the better. Y-axis: beat interval (ms). X-Axis: beat number.";
+    
     //remove jspsych styles
     var myobj = document.getElementById("jspsych-content");
     myobj.parentElement.remove();
     document.getElementsByTagName('body')[0].style = 'display:block !important';
     
+    
+    var z = document.createElement('div'); // is a node
+    z.setAttribute("id", "PolarExplanation");
+    z.appendChild(document.createTextNode(polarExp));
+    document.body.appendChild(z); 
+    
     polarTable();
+    
+    var x = document.createElement('div'); // is a node
+    x.setAttribute("id", "ScatterExplanation");
+    x.appendChild(document.createTextNode(scatterExp));
+    document.body.appendChild(x); 
+    
     scatterTable();
+    
+    var y = document.createElement('div'); // is a node
+    y.setAttribute("id", "End");
+    y.appendChild(document.createTextNode("Thanks for participating! Your data has been saved."));
+    document.body.appendChild(y); 
 }
 
-function graficon(polarData){
-    var myobj = document.getElementById("jspsych-content");
-   myobj.parentElement.remove();
-var z = document.createElement('div'); // is a node
-    z.setAttribute("id", "chartdiv");
-    document.body.appendChild(z);
-    
-    
-//am5.ready(function() {
-
-
-// Create root element
-// https://www.amcharts.com/docs/v5/getting-started/#Root_element
-var root = am5.Root.new("chartdiv");
-
-
-// Set themes
-// https://www.amcharts.com/docs/v5/concepts/themes/
-root.setThemes([
-  am5themes_Animated.new(root)
-]);
-
-
-// Create chart
-// https://www.amcharts.com/docs/v5/charts/xy-chart/
-var chart = root.container.children.push(am5radar.RadarChart.new(root, {
-  panX: false,
-  panY: false,
-  wheelX: "none",
-  wheelY: "none",
-  startAngle: -15,
-  endAngle: 345,
-  innerRadius: am5.percent(40)
-}));
-
-
-// Add cursor
-// https://www.amcharts.com/docs/v5/charts/xy-chart/cursor/
-const cursor = chart.set("cursor", am5radar.RadarCursor.new(root, {
-  behavior: "zoomX"
-}));
-cursor.lineY.set("forceHidden", true);
-
-
-// Add scrollbar
-// https://www.amcharts.com/docs/v5/charts/xy-chart/scrollbars/
-chart.set("scrollbarX", am5.Scrollbar.new(root, {
-  orientation: "horizontal",
-  exportable: false
-}));
-
-// Create axes
-// https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
-var xRenderer = am5radar.AxisRendererCircular.new(root, {
-  minGridDistance: 30
-});
-
-xRenderer.grid.template.set("forceHidden", true);
-
-var xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
-  maxDeviation: 0,
-  categoryField: "category",
-  renderer: xRenderer
-}));
-
-var yRenderer = am5radar.AxisRendererRadial.new(root, {});
-yRenderer.labels.template.set("centerX", am5.p50);
-
-var yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
-  maxDeviation: 0.3,
-  min: 0,
-  renderer: yRenderer
-}));
-
-// Add series
-// https://www.amcharts.com/docs/v5/charts/xy-chart/series/
-var series = chart.series.push(am5radar.RadarColumnSeries.new(root, {
-  name: "Series 1",
-  sequencedInterpolation: true,
-  xAxis: xAxis,
-  yAxis: yAxis,
-  valueYField: "value",
-  categoryXField: "category"
-}));
-
-// Rounded corners for columns
-series.columns.template.setAll({
-  cornerRadius: 5,
-  tooltipText: "{categoryX}: {valueY}"
-});
-
-// Make each column to be of a different color
-series.columns.template.adapters.add("fill", function (fill, target) {
-  return chart.get("colors").getIndex(series.columns.indexOf(target));
-});
-
-series.columns.template.adapters.add("stroke", function (stroke, target) {
-  return chart.get("colors").getIndex(series.columns.indexOf(target));
-});
-
-/*
-var ogData = [0, 0, 90, 180, 180, 180, 260];
-
-
-// Set data
-var data = [{ category: 0, value: 10}, { category: -30, value: 10},{ category: -60, value: 10},{ category: -90, value: 10}, { category: -120, value: 10},{ category: -150, value: 10},{ category: 180, value: 10},  { category: 150, value: 10},{ category: 120, value: 10},{ category: 90, value: 10}, { category: 60, value: 10}, { category: 30, value: 10}];
-*/
-var dict = countData(polarData);
-var data = formatData(dict);
-
-xAxis.data.setAll(data);
-series.data.setAll(data);
-
-
-// Make stuff animate on load
-// https://www.amcharts.com/docs/v5/concepts/animations/
-series.appear(1000);
-chart.appear(1000, 100);
-
-
-
-// }); // end am5.ready()
-
-
+function viewVector(vector, i){
+    var div = document.getElementById("vector"+i);
+    div.appendChild(document.createTextNode(vector));
 }
-
  
  function polarTable() {
+     var titles = ["Synchronization Only: 400ms", "Synchronization Only: 800ms", "Synchronization Only: 1200ms", "Synchronization Continuation: 400ms", "Synchronization Continuation: 800ms", "Synchronization Continuation: 1200ms"]
+     
+  // Obtener la referencia del elemento body
+  var body = document.getElementsByTagName("body")[0];
+
+  // Crea un elemento <table> y un elemento <tbody>
+  var tabla   = document.createElement("table");
+  var tblBody = document.createElement("tbody");
+
+  var exp = 0;
+  var lab = 0;
+  // Crea las celdas
+  for (var i = 0; i < 4; i++) {
+    // Crea las hileras de la tabla
+    var hilera = document.createElement("tr");
+
+    for (var j = 0; j < 3; j++) {
+      // Crea un elemento <td> y un nodo de texto, haz que el nodo de
+      // texto sea el contenido de <td>, ubica el elemento <td> al final
+      // de la hilera de la tabla
+        
+        var isLabel = i % 2;
+        if(isLabel == 0){
+            var name = document.createTextNode(titles[lab]);
+            lab++;
+        }
+        else{
+            var name = createChartDiv("chartdiv", exp);
+            exp++;
+        }
+        
+        var celda = document.createElement("th");
+        celda.appendChild(name);
+        hilera.appendChild(celda);
+      
+        
+    }
+
+    // agrega la hilera al final de la tabla (al final del elemento tblbody)
+    tblBody.appendChild(hilera);
+  }
+
+  // posiciona el <tbody> debajo del elemento <table>
+  tabla.appendChild(tblBody);
+  // appends <table> into <body>
+  body.appendChild(tabla);
+  // modifica el atributo "border" de la tabla y lo fija a "2";
+  tabla.setAttribute("border", "2");
+}
+
+ function polarTableCopia() {
   // Obtener la referencia del elemento body
   var body = document.getElementsByTagName("body")[0];
 
@@ -232,6 +193,7 @@ chart.appear(1000, 100);
 }
 
  function scatterTable() {
+     var titles = ["Synchronization Continuation: 400ms", "Synchronization Continuation: 800ms", "Synchronization Continuation: 1200ms", "Free rhythm"];
   // Obtener la referencia del elemento body
   var body = document.getElementsByTagName("body")[0];
 
@@ -240,20 +202,32 @@ chart.appear(1000, 100);
   var tblBody = document.createElement("tbody");
 
   var exp = 0;
+  var lab = 0;
   // Crea las celdas
-  for (var i = 0; i < 1; i++) {
+  for (var i = 0; i < 4; i++) {
     // Crea las hileras de la tabla
     var hilera = document.createElement("tr");
 
-    for (var j = 0; j < 3; j++) {
+    for (var j = 0; j < 2; j++) {
+        
+        var isLabel = i % 2;
+        if(isLabel == 0){
+            var name = document.createTextNode(titles[lab]);
+            lab++;
+        }
+        else{
+            var name = createChartDiv("scatterdiv", exp);
+            exp++;
+        }
+        
+        
          var celda = document.createElement("th");
       
-      var name = createChartDiv("scatterdiv", exp);
+      
         celda.appendChild(name);
       hilera.appendChild(celda);
      // hilera.appendChild(name);
       
-      exp++;
     }
 
     // agrega la hilera al final de la tabla (al final del elemento tblbody)
@@ -269,7 +243,8 @@ chart.appear(1000, 100);
 }
 
 
-function graficon1(polarData, expIndex){
+
+function polarPlot(polarData, expIndex){
     
     //var myobj1 = document.getElementById("jspsych-content");
    //myobj1.parentElement.remove();
@@ -318,12 +293,7 @@ const cursor = chart.set("cursor", am5radar.RadarCursor.new(root, {
 cursor.lineY.set("forceHidden", true);
 
 
-// Add scrollbar
-// https://www.amcharts.com/docs/v5/charts/xy-chart/scrollbars/
-chart.set("scrollbarX", am5.Scrollbar.new(root, {
-  orientation: "horizontal",
-  exportable: false
-}));
+
 
 // Create axes
 // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
@@ -440,6 +410,13 @@ var yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
   tooltip: am5.Tooltip.new(root, {})
 }));
 
+/*
+yAxis.axisHeader.children.push(am5.Label.new(root, {
+  text: "ms",
+  fontWeight: "300"
+}));
+*/
+
 // Create series
 // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
 var series0 = chart.series.push(am5xy.LineSeries.new(root, {
@@ -498,6 +475,7 @@ series1.bullets.push(function() {
   });
 });
 
+/*
 // trend series
 var trendSeries0 = chart.series.push(am5xy.LineSeries.new(root, {
   xAxis: xAxis,
@@ -525,6 +503,7 @@ trendSeries1.data.setAll([
   { x: 12, y: 19 }
 ])
 
+*/
 // Add cursor
 // https://www.amcharts.com/docs/v5/charts/xy-chart/cursor/
 chart.set("cursor", am5xy.XYCursor.new(root, {
@@ -563,7 +542,7 @@ var data = [{
 }]
 
 series0.data.setAll(dataPoints);
-series1.data.setAll(data);
+//series1.data.setAll(data);
 
 
 // Make stuff animate on load
@@ -571,8 +550,8 @@ series1.data.setAll(data);
 series0.appear(1000);
 series1.appear(1000);
 
-trendSeries0.appear(1000);
-trendSeries1.appear(1000);
+//trendSeries0.appear(1000);
+//trendSeries1.appear(1000);
 
 chart.appear(1000, 100);
 }
